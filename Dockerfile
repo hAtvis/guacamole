@@ -7,12 +7,9 @@ ENV GUAC_VER=0.9.14 \
 
 RUN set -ex \
     && ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime \
-    && yum -y install kde-l10n-Chinese \
-    && yum -y install reinstall glibc-common \
-    && localedef -c -f UTF-8 -i zh_CN zh_CN.UTF-8 \
-    && export LC_ALL=zh_CN.UTF-8 \
+    && export LANG="C.UTF-8" \
     && echo 'LANG="zh_CN.UTF-8"' > /etc/locale.conf \
-    && yum install -y java-1.8.0-openjdk git wget \
+    && apt-get install -y jdefault-jre default-jdk git wget \
     && mkdir -p /config/guacamole /config/guacamole/lib /config/guacamole/extensions \
     && wget http://mirrors.tuna.tsinghua.edu.cn/apache/tomcat/tomcat-8/v${TOMCAT_VER}/bin/apache-tomcat-${TOMCAT_VER}.tar.gz \
     && tar xf apache-tomcat-${TOMCAT_VER}.tar.gz \
@@ -30,8 +27,9 @@ RUN set -ex \
     && tar xf linux-amd64.tar.gz -C /bin/ \
     && chmod +x /bin/ssh-forward \
     && rm -rf /config/linux-amd64.tar.gz \
-    && yum clean all \
-    && rm -rf /var/cache/yum/*
+    && apt-get autoremove -y \
+    && apt-get autoclean \
+    && rm -rf /var/lib/apt/lists/*
 
 COPY readme.txt /config/readme.txt
 COPY entrypoint.sh /bin/entrypoint.sh
