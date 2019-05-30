@@ -7,9 +7,7 @@ ENV GUAC_VER=0.9.14 \
 
 RUN set -ex \
     && ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime \
-    && export LANG="C.UTF-8" \
-    && echo 'LANG="zh_CN.UTF-8"' > /etc/locale.conf \
-    && apt-get install -y jdefault-jre default-jdk git wget \
+    && apt-get install -y openjdk-8-jdk openjdk-8-jre git wget \
     && mkdir -p /config/guacamole /config/guacamole/lib /config/guacamole/extensions \
     && wget http://mirrors.tuna.tsinghua.edu.cn/apache/tomcat/tomcat-8/v${TOMCAT_VER}/bin/apache-tomcat-${TOMCAT_VER}.tar.gz \
     && tar xf apache-tomcat-${TOMCAT_VER}.tar.gz \
