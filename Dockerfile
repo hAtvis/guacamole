@@ -6,6 +6,7 @@ ENV GUAC_VER=0.9.14 \
     TOMCAT_VER=8.5.41
 
 RUN set -ex \
+    && apt-get update \
     && ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime \
     && apt-get install -y openjdk-8-jdk openjdk-8-jre git wget \
     && mkdir -p /config/guacamole /config/guacamole/lib /config/guacamole/extensions \
