@@ -19,7 +19,7 @@ RUN set -ex \
     && sed -i 's/FINE/WARNING/g' `grep 'FINE' -rl /config/tomcat8/conf/logging.properties` \
     && echo "java.util.logging.ConsoleHandler.encoding = UTF-8" >> /config/tomcat8/conf/logging.properties \
     && git clone https://github.com/jumpserver/docker-guacamole.git \
-    && cd /opt/docker-guacamole \
+    && cd /config/docker-guacamole \
     && git checkout 1.0.0 \
 	  && ln -sf /config/docker-guacamole/guacamole-${GUAC_VER}.war /config/tomcat8/webapps/ROOT.war \
     && ln -sf /config/docker-guacamole/guacamole-auth-jumpserver-${GUAC_VER}.jar /config/guacamole/extensions/guacamole-auth-jumpserver-${GUAC_VER}.jar \
