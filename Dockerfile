@@ -2,7 +2,7 @@ FROM guacamole/guacd:1.0.0
 LABEL maintainer "wojiushixiaobai"
 WORKDIR /config
 
-ENV GUAC_VER=0.9.14 \
+ENV GUAC_VER=1.0.0 \
     TOMCAT_VER=8.5.41
 
 RUN set -ex \
@@ -18,8 +18,10 @@ RUN set -ex \
     && sed -i 's/Connector port="8080"/Connector port="8081"/g' `grep 'Connector port="8080"' -rl /config/tomcat8/conf/server.xml` \
     && sed -i 's/FINE/WARNING/g' `grep 'FINE' -rl /config/tomcat8/conf/logging.properties` \
     && echo "java.util.logging.ConsoleHandler.encoding = UTF-8" >> /config/tomcat8/conf/logging.properties \
-    && git clone --depth=1 https://github.com/jumpserver/docker-guacamole.git \
-	&& wget -O /config/tomcat8/webapps/ROOT.war http://mirror.bit.edu.cn/apache/guacamole/1.0.0/binary/guacamole-1.0.0.war \
+    && git clone https://github.com/jumpserver/docker-guacamole.git \
+    && cd /opt/docker-guacamole \
+    && git checkout 1.0.0 \
+	  && ln -sf /config/docker-guacamole/guacamole-${GUAC_VER}.war /config/tomcat8/webapps/ROOT.war \
     && ln -sf /config/docker-guacamole/guacamole-auth-jumpserver-${GUAC_VER}.jar /config/guacamole/extensions/guacamole-auth-jumpserver-${GUAC_VER}.jar \
     && ln -sf /config/docker-guacamole/root/app/guacamole/guacamole.properties /config/guacamole/guacamole.properties \
     && wget https://github.com/ibuler/ssh-forward/releases/download/v0.0.5/linux-amd64.tar.gz \
