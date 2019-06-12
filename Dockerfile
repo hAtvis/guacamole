@@ -17,11 +17,8 @@ RUN set -ex \
     && rm -rf tomcat9/webapps/* \
     && sed -i 's/Connector port="8080"/Connector port="8081"/g' /config/tomcat9/conf/server.xml \
     && sed -i 's/level = FINE/level = WARNING/g' /config/tomcat9/conf/logging.properties \
-    && sed -i 's/level = INFO/level = WARNING/g' /config/tomcat9/conf/logging.properties \
     && echo "java.util.logging.ConsoleHandler.encoding = UTF-8" >> /config/tomcat9/conf/logging.properties \
     && git clone https://github.com/jumpserver/docker-guacamole.git \
-    && cd /config/docker-guacamole \
-    && git checkout 1.0.0 \
     && ln -sf /config/docker-guacamole/guacamole-${GUAC_VER}.war /config/tomcat9/webapps/ROOT.war \
     && ln -sf /config/docker-guacamole/guacamole-auth-jumpserver-${GUAC_VER}.jar /config/guacamole/extensions/guacamole-auth-jumpserver-${GUAC_VER}.jar \
     && ln -sf /config/docker-guacamole/root/app/guacamole/guacamole.properties /config/guacamole/guacamole.properties \
