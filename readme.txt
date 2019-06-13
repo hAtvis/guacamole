@@ -1,6 +1,6 @@
 Guacamole Version 1.5.0
 项目默认目录 /config
-log 位置 /config/tomcat8/logs/catalina.out
+log 位置 /config/tomcat9/logs/catalina.out
 确保BOOTSTRAP_TOKEN与jumpserver/config.yml里面的一致
 
 官网 http://www.jumpserver.org
