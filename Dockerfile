@@ -1,46 +1,57 @@
-FROM guacamole/guacd:1.0.0
-LABEL maintainer "wojiushixiaobai"
+FROM library/tomcat:9-jre8
+
+ENV ARCH=amd64 \
+  GUAC_VER=1.0.0 \
+  GUACAMOLE_HOME=/app/guacamole
+
+RUN mkdir -p ${GUACAMOLE_HOME} \
+    ${GUACAMOLE_HOME}/lib \
+    ${GUACAMOLE_HOME}/extensions
+
+WORKDIR ${GUACAMOLE_HOME}
+
+# Install dependencies
+RUN apt-get update && apt-get install -y \
+    libcairo2-dev libjpeg62-turbo-dev libpng-dev \
+    libossp-uuid-dev libavcodec-dev libavutil-dev \
+    libswscale-dev libfreerdp-dev libpango1.0-dev \
+    libssh2-1-dev libtelnet-dev libvncserver-dev \
+    libpulse-dev libssl-dev libvorbis-dev libwebp-dev \
+    ghostscript  \
+  && rm -rf /var/lib/apt/lists/*
+
+# Link FreeRDP to where guac expects it to be
+RUN [ "$ARCH" = "armhf" ] && ln -s /usr/local/lib/freerdp /usr/lib/arm-linux-gnueabihf/freerdp || exit 0
+RUN [ "$ARCH" = "amd64" ] && ln -s /usr/local/lib/freerdp /usr/lib/x86_64-linux-gnu/freerdp || exit 0
+
+# Install guacamole-server
+COPY guacamole-server-${GUAC_VER}.tar.gz .
+# RUN curl -SLO "http://apache.org/dyn/closer.cgi?action=download&filename=guacamole/${GUAC_VER}/source/guacamole-server-${GUAC_VER}.tar.gz" \
+RUN tar -xzf guacamole-server-${GUAC_VER}.tar.gz \
+  && cd guacamole-server-${GUAC_VER} \
+  && ./configure \
+  && make -j$(getconf _NPROCESSORS_ONLN) \
+  && make install \
+  && cd .. \
+  && rm -rf guacamole-server-${GUAC_VER}.tar.gz guacamole-server-${GUAC_VER} \
+  && ldconfig
+
+# Install guacamole-client and postgres auth adapter
+RUN rm -rf ${CATALINA_HOME}/webapps/ROOT
+#  && curl -SLo ${CATALINA_HOME}/webapps/ROOT.war "https://sourceforge.net/projects/guacamole/files/current/binary/guacamole-${GUAC_VER}.war"
+COPY guacamole-${GUAC_VER}.war ${CATALINA_HOME}/webapps/ROOT.war
+
+ENV PATH=/usr/lib/postgresql/${PG_MAJOR}/bin:$PATH
+ENV GUACAMOLE_HOME=/config/guacamole
+RUN mkdir -p ${GUACAMOLE_HOME}/extensions
+# curl -SLo ${GUACAMOLE_HOME}/extensions/guacamole-auth-jumpserver-${GUAC_VER}.jar "https://s3.cn-north-1.amazonaws.com.cn/tempfiles/guacamole-jumpserver/guacamole-auth-jumpserver-${GUAC_VER}.jar"
+COPY guacamole-auth-jumpserver-${GUAC_VER}.jar ${GUACAMOLE_HOME}/extensions/guacamole-auth-jumpserver-${GUAC_VER}.jar
+
+# Install ssh-forward for support
+RUN curl -SLo /tmp/linux-amd64.tar.gz "https://github.com/ibuler/ssh-forward/releases/download/v0.0.5/linux-amd64.tar.gz" \
+  && tar xvf /tmp/linux-amd64.tar.gz -C /bin/ && chmod +x /bin/ssh-forward
 WORKDIR /config
 
-ENV GUAC_VER=1.0.0 \
-    TOMCAT_VER=9.0.20
+COPY root /
 
-RUN set -ex \
-    && apt-get update \
-    && ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime \
-    && apt-get install -y openjdk-8-jdk openjdk-8-jre git wget \
-    && mkdir -p /config/guacamole /config/guacamole/lib /config/guacamole/extensions \
-    && wget http://mirrors.tuna.tsinghua.edu.cn/apache/tomcat/tomcat-9/v${TOMCAT_VER}/bin/apache-tomcat-${TOMCAT_VER}.tar.gz \
-    && tar xf apache-tomcat-${TOMCAT_VER}.tar.gz \
-    && mv apache-tomcat-${TOMCAT_VER} tomcat9 \
-    && rm -rf apache-tomcat-${TOMCAT_VER}.tar.gz \
-    && rm -rf tomcat9/webapps/* \
-    && sed -i 's/Connector port="8080"/Connector port="8081"/g' /config/tomcat9/conf/server.xml \
-    && sed -i 's/level = FINE/level = WARNING/g' /config/tomcat9/conf/logging.properties \
-    && echo "java.util.logging.ConsoleHandler.encoding = UTF-8" >> /config/tomcat9/conf/logging.properties \
-    && git clone https://github.com/jumpserver/docker-guacamole.git \
-    && ln -sf /config/docker-guacamole/guacamole-${GUAC_VER}.war /config/tomcat9/webapps/ROOT.war \
-    && ln -sf /config/docker-guacamole/guacamole-auth-jumpserver-${GUAC_VER}.jar /config/guacamole/extensions/guacamole-auth-jumpserver-${GUAC_VER}.jar \
-    && ln -sf /config/docker-guacamole/root/app/guacamole/guacamole.properties /config/guacamole/guacamole.properties \
-    && wget https://github.com/ibuler/ssh-forward/releases/download/v0.0.5/linux-amd64.tar.gz \
-    && tar xf linux-amd64.tar.gz -C /bin/ \
-    && chmod +x /bin/ssh-forward \
-    && rm -rf /config/linux-amd64.tar.gz \
-    && apt-get autoremove -y \
-    && apt-get autoclean \
-    && rm -rf /var/lib/apt/lists/*
-
-COPY readme.txt /config/readme.txt
-COPY entrypoint.sh /bin/entrypoint.sh
-RUN chmod +x /bin/entrypoint.sh
-
-ENV JUMPSERVER_KEY_DIR=/config/guacamole/keys \
-    GUACAMOLE_HOME=/config/guacamole \
-    JUMPSERVER_ENABLE_DRIVE=true \
-    JUMPSERVER_SERVER=http://127.0.0.1:8080 \
-    BOOTSTRAP_TOKEN=KXOeyNgDeTdpeu9q
-
-VOLUME /config/guacamole/keys
-
-EXPOSE 8081
-ENTRYPOINT ["entrypoint.sh"]
+ENTRYPOINT [ "/init" ]

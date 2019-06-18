@@ -11,10 +11,9 @@ This container runs the guacamole web client, the guacd server for jumpserver.
 
 ```shell
 docker run \
-  -p 8081:8081 \
+  -p 8080:8080 \
   -e JUMPSERVER_SERVER=http://<jumpserver>:8080 \
-  -e BOOTSTRAP_TOKEN=<jumpserver token> \
-  jumpserver/jms_guacamole
+  jumpserver/guacamole
 ```
 
 ## Nginx Configure
@@ -23,6 +22,6 @@ please add the following configure in you nginx config.
 
 ```
 location /guacamole/ {
-    proxy_pass http://<guacamole>:8081/;
+    proxy_pass http://<guacamole>:8080/;
 }
 ```
