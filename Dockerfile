@@ -36,7 +36,6 @@ RUN set -ex \
     && apt-get autoclean \
     && rm -rf /var/lib/apt/lists/*
 
-COPY readme.txt /config/readme.txt
 COPY entrypoint.sh /bin/entrypoint.sh
 RUN chmod +x /bin/entrypoint.sh
 
