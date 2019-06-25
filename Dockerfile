@@ -1,29 +1,33 @@
-FROM library/tomcat:9-jre8
-
+FROM guacamole/guacd:1.0.0
+LABEL maintainer "wojiushixiaobai"
 WORKDIR /config
 
-ENV GUAC_VER=1.0.0
+ENV GUAC_VER=1.0.0 \
+    TOMCAT_VER=9.0.21
 
 RUN set -ex \
     && apt-get update \
-    && apt-get install -y libcairo2-dev libjpeg62-turbo-dev libpng-dev libossp-uuid-dev libavcodec-dev libavutil-dev libswscale-dev libfreerdp-dev libpango1.0-dev libssh2-1-dev libtelnet-dev libvncserver-dev libpulse-dev libssl-dev libvorbis-dev libwebp-dev ghostscript git \
-    && ln -s /usr/local/lib/freerdp /usr/lib/x86_64-linux-gnu/freerdp \
+    && ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime \
+    && apt-get install -y openjdk-8-jdk openjdk-8-jre git wget \
     && mkdir -p /config/guacamole /config/guacamole/lib /config/guacamole/extensions \
-    && sed -i 's/Connector port="8080"/Connector port="8081"/g' /usr/local/tomcat/conf/server.xml \
-    && sed -i 's/level = FINE/level = WARNING/g' /usr/local/tomcat/conf/logging.properties \
-    && echo "java.util.logging.ConsoleHandler.encoding = UTF-8" >> /usr/local/tomcat/conf/logging.properties \
-    && git clone https://github.com/jumpserver/docker-guacamole.git \
-    && ln -sf /config/docker-guacamole/guacamole-${GUAC_VER}.war /usr/local/tomcat/webapps/ROOT.war \
+    && wget http://mirrors.tuna.tsinghua.edu.cn/apache/tomcat/tomcat-9/v${TOMCAT_VER}/bin/apache-tomcat-${TOMCAT_VER}.tar.gz \
+    && tar xf apache-tomcat-${TOMCAT_VER}.tar.gz \
+    && mv apache-tomcat-${TOMCAT_VER} tomcat9 \
+    && rm -rf apache-tomcat-${TOMCAT_VER}.tar.gz \
+    && rm -rf tomcat9/webapps/* \
+    && sed -i 's/Connector port="8080"/Connector port="8081"/g' /config/tomcat9/conf/server.xml \
+    && sed -i 's/level = FINE/level = OFF/g' /config/tomcat9/conf/logging.properties \
+    && sed -i 's/level = INFO/level = OFF/g' /config/tomcat9/conf/logging.properties \
+    && sed -i 's@CATALINA_OUT="$CATALINA_BASE"/logs/catalina.out@CATALINA_OUT=/dev/null@g' /config/tomcat9/bin/catalina.sh \
+    && sed -i 's/# export/export/g' /root/.bashrc \
+    && sed -i 's/# alias l/alias l/g' /root/.bashrc \
+    && echo "java.util.logging.ConsoleHandler.encoding = UTF-8" >> /config/tomcat9/conf/logging.properties \
+    && git clone --depth=1 https://github.com/jumpserver/docker-guacamole.git \
+    && cd /config \
+    && rm -rf /config/tomcat9/webapps/* \
+    && ln -sf /config/docker-guacamole/guacamole-${GUAC_VER}.war /config/tomcat9/webapps/ROOT.war \
     && ln -sf /config/docker-guacamole/guacamole-auth-jumpserver-${GUAC_VER}.jar /config/guacamole/extensions/guacamole-auth-jumpserver-${GUAC_VER}.jar \
     && ln -sf /config/docker-guacamole/root/app/guacamole/guacamole.properties /config/guacamole/guacamole.properties \
-    && cd /config/docker-guacamole \
-    && tar xf guacamole-server-${GUAC_VER}.tar.gz \
-    && cd guacamole-server-${GUAC_VER} \
-    && ./configure \
-    && make \
-    && make install \
-    && cd .. \
-    && rm -rf guacamole-server-${GUAC_VER} \
     && wget https://github.com/ibuler/ssh-forward/releases/download/v0.0.5/linux-amd64.tar.gz \
     && tar xf linux-amd64.tar.gz -C /bin/ \
     && chmod +x /bin/ssh-forward \
