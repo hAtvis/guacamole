@@ -2,7 +2,8 @@ FROM centos:latest
 LABEL maintainer "wojiushixiaobai"
 WORKDIR /config
 
-ENV GUAC_VER=1.0.0 \
+ENV LC_ALL=en_US.UTF-8 \
+    GUAC_VER=1.0.0 \
     TOMCAT_VER=9.0.21
 
 RUN set -ex \
@@ -11,11 +12,6 @@ RUN set -ex \
     && curl -o /etc/yum.repos.d/epel.repo http://mirrors.aliyun.com/repo/epel-7.repo \
     && yum makecache \
     && ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime \
-    && yum -y install kde-l10n-Chinese \
-    && yum -y install reinstall glibc-common \
-    && localedef -c -f UTF-8 -i zh_CN zh_CN.UTF-8 \
-    && export LC_ALL=zh_CN.UTF-8 \
-    && echo 'LANG="zh_CN.UTF-8"' > /etc/locale.conf \
     && mkdir /usr/local/lib/freerdp/ \
     && ln -s /usr/local/lib/freerdp /usr/lib64/freerdp \
     && rpm --import http://li.nux.ro/download/nux/RPM-GPG-KEY-nux.ro \
@@ -24,7 +20,7 @@ RUN set -ex \
     && yum install -y make gcc libtool java-1.8.0-openjdk git wget \
     && yum install -y cairo-devel libjpeg-turbo-devel libpng-devel uuid-devel \
     && yum install -y ffmpeg-devel freerdp-devel freerdp-plugins pango-devel libssh2-devel libtelnet-devel libvncserver-devel pulseaudio-libs-devel openssl-devel libvorbis-devel libwebp-devel ghostscript \
-    && mkdir -p /config/guacamole /config/guacamole/lib /config/guacamole/extensions \
+    && mkdir -p /config/guacamole /config/guacamole/lib /config/guacamole/extensions /config/guacamole/data/log/ \
     && wget http://mirrors.tuna.tsinghua.edu.cn/apache/tomcat/tomcat-9/v${TOMCAT_VER}/bin/apache-tomcat-${TOMCAT_VER}.tar.gz \
     && tar xf apache-tomcat-${TOMCAT_VER}.tar.gz \
     && mv apache-tomcat-${TOMCAT_VER} tomcat9 \
