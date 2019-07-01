@@ -40,6 +40,7 @@ RUN set -ex \
     && ./configure --with-init-dir=/etc/init.d \
     && make \
     && make install \
+    && ldconfig \
     && cd .. \
     && rm -rf guacamole-server-${GUAC_VER} \
     && ln -sf /config/docker-guacamole/guacamole-${GUAC_VER}.war /config/tomcat9/webapps/ROOT.war \
