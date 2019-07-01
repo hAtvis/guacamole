@@ -1,21 +1,33 @@
-FROM guacamole/guacd:1.0.0
+FROM centos:latest
 LABEL maintainer "wojiushixiaobai"
 WORKDIR /config
 
 ENV GUAC_VER=1.0.0 \
-    TOMCAT_VER=9.0.21
+    TOMCAT_VER=9.0.21 \
 
 RUN set -ex \
-    && apt-get update \
     && ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime \
-    && apt-get install -y openjdk-8-jdk openjdk-8-jre git wget \
+    && yum -y install kde-l10n-Chinese \
+    && yum -y install reinstall glibc-common \
+    && localedef -c -f UTF-8 -i zh_CN zh_CN.UTF-8 \
+    && export LC_ALL=zh_CN.UTF-8 \
+    && echo 'LANG="zh_CN.UTF-8"' > /etc/locale.conf \
+    && mkdir /usr/local/lib/freerdp/ \
+    && ln -s /usr/local/lib/freerdp /usr/lib64/freerdp \
+    && yum -y localinstall --nogpgcheck https://download1.rpmfusion.org/free/el/rpmfusion-free-release-7.noarch.rpm https://download1.rpmfusion.org/nonfree/el/rpmfusion-nonfree-release-7.noarch.rpm \
+    && rpm --import http://li.nux.ro/download/nux/RPM-GPG-KEY-nux.ro \	    
+    && rpm --import http://li.nux.ro/download/nux/RPM-GPG-KEY-nux.ro \
+    && rpm -Uvh http://li.nux.ro/download/nux/dextop/el7/x86_64/nux-dextop-release-0-1.el7.nux.noarch.rpm \	    
+    && rpm -Uvh http://li.nux.ro/download/nux/dextop/el7/x86_64/nux-dextop-release-0-1.el7.nux.noarch.rpm \
+    && yum install -y make gcc libtool java-1.8.0-openjdk git wget \
+    && yum install -y cairo-devel libjpeg-turbo-devel libpng-devel uuid-devel \
+    && yum install -y ffmpeg-devel freerdp-devel freerdp-plugins pango-devel libssh2-devel libtelnet-devel libvncserver-devel pulseaudio-libs-devel openssl-devel libvorbis-devel libwebp-devel ghostscript \
     && mkdir -p /config/guacamole /config/guacamole/lib /config/guacamole/extensions \
     && wget http://mirrors.tuna.tsinghua.edu.cn/apache/tomcat/tomcat-9/v${TOMCAT_VER}/bin/apache-tomcat-${TOMCAT_VER}.tar.gz \
     && tar xf apache-tomcat-${TOMCAT_VER}.tar.gz \
     && mv apache-tomcat-${TOMCAT_VER} tomcat9 \
     && rm -rf apache-tomcat-${TOMCAT_VER}.tar.gz \
     && rm -rf tomcat9/webapps/* \
-    && sed -i 's/Connector port="8080"/Connector port="8081"/g' /config/tomcat9/conf/server.xml \
     && sed -i 's/level = FINE/level = OFF/g' /config/tomcat9/conf/logging.properties \
     && sed -i 's/level = INFO/level = OFF/g' /config/tomcat9/conf/logging.properties \
     && sed -i 's@CATALINA_OUT="$CATALINA_BASE"/logs/catalina.out@CATALINA_OUT=/dev/null@g' /config/tomcat9/bin/catalina.sh \
@@ -23,8 +35,15 @@ RUN set -ex \
     && sed -i 's/# alias l/alias l/g' /root/.bashrc \
     && echo "java.util.logging.ConsoleHandler.encoding = UTF-8" >> /config/tomcat9/conf/logging.properties \
     && git clone --depth=1 https://github.com/jumpserver/docker-guacamole.git \
-    && cd /config \
-    && rm -rf /config/tomcat9/webapps/* \
+    && cd /config/docker-guacamole \
+    && tar xf guacamole-server-${GUAC_VER}.tar.gz \
+    && cd guacamole-server-${GUAC_VER} \
+    && autoreconf -fi \
+    && ./configure --with-init-dir=/etc/init.d \
+    && make \
+    && make install \
+    && cd .. \
+    && rm -rf guacamole-server-${GUAC_VER} \
     && ln -sf /config/docker-guacamole/guacamole-${GUAC_VER}.war /config/tomcat9/webapps/ROOT.war \
     && ln -sf /config/docker-guacamole/guacamole-auth-jumpserver-${GUAC_VER}.jar /config/guacamole/extensions/guacamole-auth-jumpserver-${GUAC_VER}.jar \
     && ln -sf /config/docker-guacamole/root/app/guacamole/guacamole.properties /config/guacamole/guacamole.properties \
@@ -32,9 +51,9 @@ RUN set -ex \
     && tar xf linux-amd64.tar.gz -C /bin/ \
     && chmod +x /bin/ssh-forward \
     && rm -rf /config/linux-amd64.tar.gz \
-    && apt-get autoremove -y \
-    && apt-get autoclean \
-    && rm -rf /var/lib/apt/lists/*
+    && yum -y autoremove autoconf automake cairo-devel freerdp-devel gcc libjpeg-turbo-devel libssh2-devel libtool libtelnet-devel libvorbis-devel libvncserver-devel libwebp-devel make pango-devel pulseaudio-libs-devel uuid-devel \
+    && yum clean all \
+    && rm -rf /var/cache/yum/*
 
 COPY entrypoint.sh /bin/entrypoint.sh
 RUN chmod +x /bin/entrypoint.sh
