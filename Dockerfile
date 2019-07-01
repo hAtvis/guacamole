@@ -3,7 +3,7 @@ LABEL maintainer "wojiushixiaobai"
 WORKDIR /config
 
 ENV GUAC_VER=1.0.0 \
-    TOMCAT_VER=9.0.21 \
+    TOMCAT_VER=9.0.21
 
 RUN set -ex \
     && ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime \
@@ -15,9 +15,9 @@ RUN set -ex \
     && mkdir /usr/local/lib/freerdp/ \
     && ln -s /usr/local/lib/freerdp /usr/lib64/freerdp \
     && yum -y localinstall --nogpgcheck https://download1.rpmfusion.org/free/el/rpmfusion-free-release-7.noarch.rpm https://download1.rpmfusion.org/nonfree/el/rpmfusion-nonfree-release-7.noarch.rpm \
-    && rpm --import http://li.nux.ro/download/nux/RPM-GPG-KEY-nux.ro \	    
     && rpm --import http://li.nux.ro/download/nux/RPM-GPG-KEY-nux.ro \
-    && rpm -Uvh http://li.nux.ro/download/nux/dextop/el7/x86_64/nux-dextop-release-0-1.el7.nux.noarch.rpm \	    
+    && rpm --import http://li.nux.ro/download/nux/RPM-GPG-KEY-nux.ro \
+    && rpm -Uvh http://li.nux.ro/download/nux/dextop/el7/x86_64/nux-dextop-release-0-1.el7.nux.noarch.rpm \
     && rpm -Uvh http://li.nux.ro/download/nux/dextop/el7/x86_64/nux-dextop-release-0-1.el7.nux.noarch.rpm \
     && yum install -y make gcc libtool java-1.8.0-openjdk git wget \
     && yum install -y cairo-devel libjpeg-turbo-devel libpng-devel uuid-devel \
