@@ -14,5 +14,4 @@ if [ ! -f "/config/guacamole/data/log/info.log" ]; then
     echo "" > /config/guacamole/data/log/info.log
 fi
 
-sleep 10s
 tail -f /config/guacamole/data/log/info.log

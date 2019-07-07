@@ -26,10 +26,6 @@ RUN set -ex \
     && mv apache-tomcat-${TOMCAT_VER} tomcat9 \
     && rm -rf apache-tomcat-${TOMCAT_VER}.tar.gz \
     && rm -rf tomcat9/webapps/* \
-    && sed -i 's/Connector port="8080"/Connector port="8081"/g' /config/tomcat9/conf/server.xml \
-    && sed -i 's/level = FINE/level = OFF/g' /config/tomcat9/conf/logging.properties \
-    && sed -i 's/level = INFO/level = OFF/g' /config/tomcat9/conf/logging.properties \
-    && sed -i 's@CATALINA_OUT="$CATALINA_BASE"/logs/catalina.out@CATALINA_OUT=/dev/null@g' /config/tomcat9/bin/catalina.sh \
     && sed -i 's/# export/export/g' /root/.bashrc \
     && sed -i 's/# alias l/alias l/g' /root/.bashrc \
     && echo "java.util.logging.ConsoleHandler.encoding = UTF-8" >> /config/tomcat9/conf/logging.properties \
@@ -51,7 +47,6 @@ RUN set -ex \
     && tar xf linux-amd64.tar.gz -C /bin/ \
     && chmod +x /bin/ssh-forward \
     && rm -rf /config/linux-amd64.tar.gz \
-    && yum -y autoremove autoconf automake cairo-devel freerdp-devel gcc libjpeg-turbo-devel libssh2-devel libtool libtelnet-devel libvorbis-devel libvncserver-devel make pango-devel pulseaudio-libs-devel \
     && yum clean all \
     && rm -rf /var/cache/yum/*
 
