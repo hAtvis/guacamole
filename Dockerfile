@@ -51,7 +51,6 @@ RUN set -ex \
     && tar xf linux-amd64.tar.gz -C /bin/ \
     && chmod +x /bin/ssh-forward \
     && rm -rf /config/linux-amd64.tar.gz \
-    && yum -y autoremove autoconf automake cairo-devel freerdp-devel gcc libjpeg-turbo-devel libssh2-devel libtool libtelnet-devel libvorbis-devel libvncserver-devel make pango-devel pulseaudio-libs-devel \
     && yum clean all \
     && rm -rf /var/cache/yum/*
 
