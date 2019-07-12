@@ -1,9 +1,9 @@
 FROM centos:latest
-LABEL maintainer "wojiushixiaobai"
+LABEL maintainer "guan9409"
 WORKDIR /config
 
 ENV LC_ALL=en_US.UTF-8 \
-    GUAC_VER=1.0.0 \
+    GUAC_VER=0.9.14 \
     TOMCAT_VER=9.0.21
 
 RUN set -ex \
@@ -33,7 +33,7 @@ RUN set -ex \
     && sed -i 's/# export/export/g' /root/.bashrc \
     && sed -i 's/# alias l/alias l/g' /root/.bashrc \
     && echo "java.util.logging.ConsoleHandler.encoding = UTF-8" >> /config/tomcat9/conf/logging.properties \
-    && git clone --depth=1 https://github.com/jumpserver/docker-guacamole.git \
+    && git clone --branch 1.4.10 --depth=1 https://github.com/jumpserver/docker-guacamole.git \
     && cd /config/docker-guacamole \
     && tar xf guacamole-server-${GUAC_VER}.tar.gz \
     && cd guacamole-server-${GUAC_VER} \
@@ -61,7 +61,6 @@ ENV JUMPSERVER_KEY_DIR=/config/guacamole/keys \
     GUACAMOLE_HOME=/config/guacamole \
     JUMPSERVER_ENABLE_DRIVE=true \
     JUMPSERVER_SERVER=http://127.0.0.1:8080 \
-    BOOTSTRAP_TOKEN=KXOeyNgDeTdpeu9q
 
 VOLUME /config/guacamole/keys
 
