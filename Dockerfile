@@ -60,9 +60,9 @@ RUN chmod +x /bin/entrypoint.sh
 ENV JUMPSERVER_KEY_DIR=/config/guacamole/keys \
     GUACAMOLE_HOME=/config/guacamole \
     JUMPSERVER_ENABLE_DRIVE=true \
-    JUMPSERVER_SERVER=http://127.0.0.1:8080 \
+    JUMPSERVER_SERVER=http://127.0.0.1:8080
 
-VOLUME ["/config/guacamole/keys"]
+VOLUME /config/guacamole/keys
 
 EXPOSE 8081
 ENTRYPOINT ["entrypoint.sh"]
